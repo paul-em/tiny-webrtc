@@ -37,3 +37,12 @@ You can also pass options as constructor at the beginning.
 - **roomParamName** String *(default:'r')* - parameter name to be shown in the address bar
 - **autoInit** Boolean *(default:true)* - init automatically or manually
 - **room** String/Integer *(default:generated/fetched of url)* - pass a room number on your own
+
+## States
+
+- **0** *loaded*
+- **1** *init*
+- **2** *script loaded*
+- **3** *camera/mic access*
+- **4** *ready - waiting for partners to join*
+- **5** *in videochat*
