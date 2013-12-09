@@ -1,4 +1,4 @@
-## tiny-webrtc
+## tiny webRTC
 
 
 WebRTC is (or should be) native in modern browsers. SO why would an API Wrap need tons of depenedencies?
