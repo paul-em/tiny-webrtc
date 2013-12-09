@@ -34,7 +34,6 @@ You can also pass options as constructor at the beginning.
 - **iceServers** Arraz *(default:[{"url": "stun:stun.l.google.com:19302"}])* - stun servers to get the best connection between you and your partner. Leave this as is, if you don't know how to create your own.
 - **mediaConstraints** Object *(default:{ mandatory: { OfferToReceiveAudio: true, OfferToReceiveVideo: true } })* - list of devices you want to access.
 - **roomParamType** String *(default:'hash')* - choose 'hash', 'search', or 'off' to decide how to pass your room number
-- 
 - **roomParamName** String *(default:'r')* - parameter name to be shown in the address bar
 - **autoInit** Boolean *(default:true)* - init automatically or manually
 - **room** String/Integer *(default:generated/fetched of url)* - pass a room number on your own
