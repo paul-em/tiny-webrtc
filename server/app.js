@@ -23,9 +23,8 @@ io.sockets.on('connection',
         socket.$emit = function () {
             var fn = arguments[0];
             console.log('-->[' + fn + ']', arguments[1]);
-            var cb = arguments[2] || function () {
-            };
-            console.log(typeof cb);
+            var cb = arguments[2] || noop;
+
             arguments[2] = function (data) {
                 console.log('<--[' + fn + ']', data);
                 cb(data);
@@ -147,7 +146,6 @@ io.sockets.on('connection',
             if (params !== null && typeof params === "object") {
                 for (var i in expected) {
                     if (expected.hasOwnProperty(i) && !params.hasOwnProperty(expected[i])) {
-                        console.log("param ",expected[i],"missing");
                         return false;
                     }
                 }

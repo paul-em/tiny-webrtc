@@ -24,10 +24,11 @@ var WebRTC = (function (opt) {
             "no getUserMedia support on your browser :(",
             "An Error occured while accessing your camera and microphone. Please reload this page",
             "connecting to server failed",
-            "registration on server failed",
+            "joining room on server failed",
             "could not get socket script",
             "sending offer failed",
-            "sending answer failed"
+            "sending answer failed",
+            "leaving room on server failed"
         ];
 
     var stateChangeCallback = function (a, b) {
@@ -56,6 +57,7 @@ var WebRTC = (function (opt) {
         roomParamType: "hash",
         roomParamName: "r",
         autoInit: true,
+        autoJoinRoom: true,
         room: generateRoomName()
     };
 
@@ -78,16 +80,9 @@ var WebRTC = (function (opt) {
             if (pRoom) {
                 config.room = pRoom;
             }
-            socket.emit("joinRoom", {room: config.room}, function (data) {
-                if (data.success) {
-                    if (data.data.users.length != 0) {
-                        sendOffer(data.data.users);
-                    }
-                    stateChange(4);
-                } else {
-                    error(4);
-                }
-            });
+            if (config.autoJoinRoom) {
+                joinRoom();
+            }
         });
 
         socket.on("offer", function (data) {
@@ -119,6 +114,19 @@ var WebRTC = (function (opt) {
 
         socket.on("userLeave", function (data) {
             remove(data.userId);
+        });
+    }
+
+    function joinRoom() {
+        socket.emit("joinRoom", {room: config.room}, function (data) {
+            if (data.success) {
+                if (data.data.users.length != 0) {
+                    sendOffer(data.data.users);
+                }
+                stateChange(4);
+            } else {
+                error(4);
+            }
         });
     }
 
@@ -230,6 +238,7 @@ var WebRTC = (function (opt) {
         };
         peerConnections[userId].onaddstream = function (event) {
             peerConnections[userId].streamURL = window.URL.createObjectURL(event.stream) || event.stream;
+            peerConnections[userId].stream = event.stream;
             userConnectCallback(userId);
             if (count(peerConnections) == 1) {
                 stateChange(5);
@@ -241,6 +250,7 @@ var WebRTC = (function (opt) {
         peerConnections[userId].addStream(localStream);
         peerConnections[userId].userId = userId;
         peerConnections[userId].streamURL = "";
+        peerConnections[userId].stream = "";
     }
 
 
@@ -309,6 +319,25 @@ var WebRTC = (function (opt) {
 
     self.getState = function () {
         return state;
+    };
+
+    self.joinRoom = function (room) {
+        config.room = room;
+        joinRoom();
+    };
+
+    self.leaveRoom = function () {
+        for (var i in peerConnections) {
+            if (peerConnections.hasOwnProperty(i))
+                peerConnections[i].stream.stop();
+        }
+        socket.emit("leaveRoom", null, function (data) {
+            if (data.success) {
+                config.room = null;
+            } else {
+                error(8);
+            }
+        });
     };
 
     self.getRoom = function () {
