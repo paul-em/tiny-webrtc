@@ -25,6 +25,19 @@ webRTC.onData(function(userId, data){})
 webRTC.onError(function(errorId, errorDescription){})
 ```
 
+available API calls are
+
+``` js
+webRTC.init(); // init manually if autoInit set to false
+webRTC.getRemoteStream(userId); // returns URL for remote Stream - just set this as src for your video element
+webRTC.getLocalStream(); // returns URL for local Stream - just set this as src for your video element
+webRTC.getState(); // returns current state
+webRTC.joinRoom(room); // joins any room (string or int) and leaves previous rooms
+webRTC.leaveRoom(); // leave current room and stop remoteStreams
+webRTC.getRoom(); // returns current room name
+webRTC.setConfig(opt); // set config like in constructor
+```
+
 ## Config Options
 
 You can also pass options as constructor at the beginning.
