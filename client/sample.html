@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sample WebRTC Conference</title>
+    <meta charset="utf-8">
+    <style>
+        #me {
+            transform: scaleX(-1);
+            -webkit-transform: scaleX(-1);
+        }
+    </style>
+</head>
+<body>
+<video id="me" autoplay="autoplay"></video>
+
+<script src="webrtc-conference.js"></script>
+<script>
+    var webRTC = new WebRTC();
+    webRTC.onStateChange(function (state, msg) {
+        console.log(state, msg);
+        if (state == 3) {
+            document.getElementById("me").src = webRTC.getLocalStream();
+        }
+    });
+
+    webRTC.onError(function (id, msg) {
+        console.error(msg);
+    });
+
+    webRTC.onUserConnect(function (userId) {
+        console.log("userConnect", userId);
+        var video = document.createElement('video');
+        video.src = webRTC.getRemoteStream(userId);
+        video.autoplay = "autoplay";
+        video.id = "remote-" + userId;
+        document.body.appendChild(video);
+    });
+
+    webRTC.onUserLeave(function (userId) {
+        console.log("userLeave", userId);
+        var el = document.getElementById("remote-" + userId);
+        if(el){
+            el.parentElement.removeChild(el);
+        }
+    });
+
+
+</script>
+</body>
+</html>

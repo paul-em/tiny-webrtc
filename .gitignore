@@ -1,0 +1,14 @@
+.DS_STORE
+
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# IntelliJ Settings
+.idea
+
+# Plugin builds
+*.zip
