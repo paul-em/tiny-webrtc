@@ -12,22 +12,44 @@ console.log("info: listening on port " + port);
 
 // global variables
 var userCounter = 0;
-var noop = function(){};
+var noop = function () {
+};
 
 io.sockets.on('connection',
     function (socket) {
-        socket.on('register', function (data, callback) {
+        socket.userId = userCounter++;
+
+        var $emit = socket.$emit;
+        socket.$emit = function () {
+            var fn = arguments[0];
+            console.log('-->[' + fn + ']', arguments[1]);
+            var cb = arguments[2] || function () {
+            };
+            console.log(typeof cb);
+            arguments[2] = function (data) {
+                console.log('<--[' + fn + ']', data);
+                cb(data);
+            };
+            $emit.apply(socket, arguments);
+        };
+
+
+        socket.on('joinRoom', function (data, callback) {
             callback = callback || noop;
-            if (data.r === undefined) {
-                callback({success: false, error: "no room selected", data: null});
+            if (data.room === undefined) {
+                callback({success: false, error: "wrong arguments", data: null});
                 return;
             }
+
+            if(socket.room){
+                leaveRoom();
+            }
+
             var userArray = [];
 
             // create room if not exists
-            var members = io.sockets.clients(data.r);
-            socket.join(data.r);
-
+            var members = io.sockets.clients(data.room);
+            socket.join(data.room);
 
             // get members
             for (var i in members) {
@@ -36,18 +58,24 @@ io.sockets.on('connection',
                 }
             }
             // save room and userId in socket object
-            socket.room = data.r;
-            socket.userId = userCounter++;
-            socket.auth = true;
+            socket.room = data.room;
 
             // return users
-            console.log("[register] userId", socket.userId, "room", socket.room);
             callback({success: true, error: null, data: {users: userArray, userId: socket.userId}});
         });
 
+        socket.on('leaveRoom', function (data, callback) {
+            callback = callback || noop;
+            leaveRoom();
+            callback({success: true, error: null, data: null});
+        });
+
+
         socket.on('answer', function (data, callback) {
             callback = callback || noop;
-            if (validArguments(["userId", "answer"], data)) {
+            if (socket.room === undefined) {
+                callback({success: false, error: "no room selected", data: null});
+            } else if (validArguments(["userId", "answer"], data)) {
                 var forwardSocket = getSocket(socket.room, data.userId);
                 if (forwardSocket) {
                     forwardSocket.emit("answer", {
@@ -66,7 +94,9 @@ io.sockets.on('connection',
 
         socket.on('offer', function (data, callback) {
             callback = callback || noop;
-            if (validArguments(["userId", "offer"], data)) {
+            if (socket.room === undefined) {
+                callback({success: false, error: "no room selected", data: null});
+            } else if (validArguments(["userId", "offer"], data)) {
                 var forwardSocket = getSocket(socket.room, data.userId);
                 if (forwardSocket) {
                     forwardSocket.emit("offer", {
@@ -85,7 +115,9 @@ io.sockets.on('connection',
 
         socket.on('iceCandidate', function (data, callback) {
             callback = callback || noop;
-            if (validArguments(["userId", "iceCandidate"], data)) {
+            if (socket.room === undefined) {
+                callback({success: false, error: "no room selected", data: null});
+            } else if (validArguments(["userId", "iceCandidate"], data)) {
                 var forwardSocket = getSocket(socket.room, data.userId);
                 if (forwardSocket) {
                     forwardSocket.emit("iceCandidate", {
@@ -102,14 +134,20 @@ io.sockets.on('connection',
         });
 
         socket.on('disconnect', function () {
-            io.sockets.in(socket.room).emit("userLeave", {userId: socket.userId});
-            console.log("[disconnect] userId", socket.userId, "room", socket.room);
+            leaveRoom();
         });
 
+        function leaveRoom(){
+            socket.leave(socket.room);
+            io.sockets.in(socket.room).emit("userLeave", {userId: socket.userId});
+            socket.room = undefined;
+        }
+
         function validArguments(expected, params) {
-            if (socket.auth === true && params !== null && typeof params === "object") {
+            if (params !== null && typeof params === "object") {
                 for (var i in expected) {
                     if (expected.hasOwnProperty(i) && !params.hasOwnProperty(expected[i])) {
+                        console.log("param ",expected[i],"missing");
                         return false;
                     }
                 }

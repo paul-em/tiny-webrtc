@@ -24,14 +24,30 @@ describe("Server", function () {
         }, "it should be connected", 3000);
     });
 
-    describe("register", function () {
+    describe("joinRoom", function () {
+        it("should tell me is should enter room first", function () {
+            var done = false;
+            runs(function () {
+                socket.emit("offer", {userId: 99999, offer: {offer: 1}}, function (data) {
+                    done = true;
+                    expect(data.success).toBeFalsy();
+                    expect(data.error).toBe("no room selected");
+                    expect(data.data).toBeNull();
+                })
+            });
+
+            waitsFor(function () {
+                return done;
+            }, "it should callback a response", 3000);
+        });
+
         it("should tell me there is missing room param", function () {
             var done = false;
             runs(function () {
-                socket.emit("register", {}, function (data) {
+                socket.emit("joinRoom", {}, function (data) {
                     done = true;
                     expect(data.success).toBeFalsy();
-                    expect(typeof data.error).toBe("string");
+                    expect(data.error).toBe("wrong arguments");
                     expect(data.data).toBeNull();
                 })
             });
@@ -42,10 +58,10 @@ describe("Server", function () {
         });
 
 
-        it("should register me and tell me there are no users in the room", function () {
+        it("should join my room and tell me there are no users in the room", function () {
             var done = false;
             runs(function () {
-                socket.emit("register", {r: "testRoom1"}, function (data) {
+                socket.emit("joinRoom", {room: "testRoom1"}, function (data) {
                     done = true;
                     expect(data.success).toBeTruthy();
                     expect(data.error).toBeNull();
@@ -69,7 +85,7 @@ describe("Server", function () {
                 socket.emit("answer", null, function (data) {
                     done = true;
                     expect(data.success).toBeFalsy();
-                    expect(typeof data.error).toBe("string");
+                    expect(data.error).toBe("wrong arguments");
                     expect(data.data).toBeNull();
                 });
             });
@@ -82,10 +98,10 @@ describe("Server", function () {
         it("should inform me, that user is gone", function () {
             var done = false;
             runs(function () {
-                socket.emit("answer", {userId: 99999, answer: {offer: 1}, peer: {peer: 1}}, function (data) {
+                socket.emit("answer", {userId: 99999, answer: {offer: 1}}, function (data) {
                     done = true;
                     expect(data.success).toBeFalsy();
-                    expect(typeof data.error).toBe("string");
+                    expect(data.error).toBe("users does not exist");
                 });
             });
 
@@ -101,10 +117,10 @@ describe("Server", function () {
                     done++;
                     expect(data.userId).toBe(userId);
                     expect(data.answer.answer).toBe(1);
-                    expect(data.peer.peer).toBe(1);
                 });
 
-                socket.emit("answer", {userId: userId, answer: {answer: 1}, peer: {peer: 1}}, function (data) {
+                socket.emit("answer", {userId: userId, answer: {answer: 1}}, function (data) {
+                    console.log(data);
                     done++;
                     expect(data.success).toBeTruthy();
                     expect(data.error).toBeNull();
@@ -124,7 +140,7 @@ describe("Server", function () {
                 socket.emit("offer", null, function (data) {
                     done = true;
                     expect(data.success).toBeFalsy();
-                    expect(typeof data.error).toBe("string");
+                    expect(data.error).toBe("wrong arguments");
                     expect(data.data).toBeNull();
                 });
             });
@@ -137,10 +153,10 @@ describe("Server", function () {
         it("should inform me, that user is gone", function () {
             var done = false;
             runs(function () {
-                socket.emit("offer", {userId: 99999, offer: {offer: 1}, peer: {peer: 1}}, function (data) {
+                socket.emit("offer", {userId: 99999, offer: {offer: 1}}, function (data) {
                     done = true;
                     expect(data.success).toBeFalsy();
-                    expect(typeof data.error).toBe("string");
+                    expect(data.error).toBe("users does not exist");
                 });
             });
 
@@ -156,10 +172,9 @@ describe("Server", function () {
                     done++;
                     expect(data.userId).toBe(userId);
                     expect(data.offer.offer).toBe(1);
-                    expect(data.peer.peer).toBe(1);
                 });
 
-                socket.emit("offer", {userId: userId, offer: {offer: 1}, peer: {peer: 1}}, function (data) {
+                socket.emit("offer", {userId: userId, offer: {offer: 1}}, function (data) {
                     done++;
                     expect(data.success).toBeTruthy();
                     expect(data.error).toBeNull();
@@ -180,7 +195,7 @@ describe("Server", function () {
                 socket.emit("iceCandidate", null, function (data) {
                     done = true;
                     expect(data.success).toBeFalsy();
-                    expect(typeof data.error).toBe("string");
+                    expect(data.error).toBe("wrong arguments");
                     expect(data.data).toBeNull();
                 });
             });
@@ -196,7 +211,7 @@ describe("Server", function () {
                 socket.emit("iceCandidate", {userId: 99999, iceCandidate: {a:1}}, function (data) {
                     done = true;
                     expect(data.success).toBeFalsy();
-                    expect(typeof data.error).toBe("string");
+                    expect(data.error).toBe("users does not exist");
                 });
             });
 
@@ -224,6 +239,58 @@ describe("Server", function () {
 
             waitsFor(function () {
                 return done >= 2;
+            }, "it should callback a response", 3000);
+        });
+    });
+
+    describe("leaveRoom", function () {
+        it("should successfully leave room", function () {
+            var done = false;
+            runs(function () {
+                socket.emit("leaveRoom", null, function (data) {
+                    done = true;
+                    expect(data.success).toBeTruthy();
+                    expect(data.error).toBeNull();
+                });
+            });
+
+            waitsFor(function () {
+                return done;
+            }, "it should callback a response", 3000);
+        });
+
+        it("should tell me is should enter room first", function () {
+            var done = false;
+            runs(function () {
+                socket.emit("offer", {userId: userId, offer: {offer: 1}}, function (data) {
+                    done = true;
+                    expect(data.success).toBeFalsy();
+                    expect(data.error).toBe("no room selected");
+                    expect(data.data).toBeNull();
+                })
+            });
+
+            waitsFor(function () {
+                return done;
+            }, "it should callback a response", 3000);
+        });
+
+        it("should join my room and tell me there are no users in the room", function () {
+            var done = false;
+            runs(function () {
+                socket.emit("joinRoom", {room: "testRoom1"}, function (data) {
+                    done = true;
+                    expect(data.success).toBeTruthy();
+                    expect(data.error).toBeNull();
+                    expect(data.data.users).toBeDefined();
+                    expect(data.data.users.length).toEqual(0);
+                    expect(data.data.userId).toBeDefined();
+                    userId = data.data.userId;
+                });
+            });
+
+            waitsFor(function () {
+                return done;
             }, "it should callback a response", 3000);
         });
     });

@@ -7,7 +7,7 @@ var WebRTC = (function (opt) {
         socket,
         cameraAccess = false,
         wsScriptLoaded = false,
-        instance = this,
+        self = this,
         state = 0,
         init = false,
         socketScriptTries = 0,
@@ -78,7 +78,7 @@ var WebRTC = (function (opt) {
             if (pRoom) {
                 config.room = pRoom;
             }
-            socket.emit("register", {r: config.room}, function (data) {
+            socket.emit("joinRoom", {room: config.room}, function (data) {
                 if (data.success) {
                     if (data.data.users.length != 0) {
                         sendOffer(data.data.users);
@@ -254,7 +254,7 @@ var WebRTC = (function (opt) {
     }
 
 
-    instance.init = function () {
+    self.init = function () {
         if (!init) {
             init = true;
             stateChange(1);
@@ -275,27 +275,27 @@ var WebRTC = (function (opt) {
     };
 
 
-    instance.onStateChange = function (callback) {
+    self.onStateChange = function (callback) {
         stateChangeCallback = callback;
     };
 
-    instance.onUserConnect = function (callback) {
+    self.onUserConnect = function (callback) {
         userConnectCallback = callback;
     };
 
-    instance.onUserLeave = function (callback) {
+    self.onUserLeave = function (callback) {
         userLeaveCallback = callback;
     };
 
-    instance.onData = function (callback) {
+    self.onData = function (callback) {
         dataCallback = callback;
     };
 
-    instance.onError = function (callback) {
+    self.onError = function (callback) {
         errorCallback = callback;
     };
 
-    instance.getRemoteStream = function (userId) {
+    self.getRemoteStream = function (userId) {
         if (peerConnections[userId]) {
             return peerConnections[userId].streamURL;
         } else {
@@ -303,19 +303,19 @@ var WebRTC = (function (opt) {
         }
     };
 
-    instance.getLocalStream = function () {
+    self.getLocalStream = function () {
         return localStreamURL;
     };
 
-    instance.getState = function () {
+    self.getState = function () {
         return state;
     };
 
-    instance.getRoom = function () {
+    self.getRoom = function () {
         return config.room;
     };
 
-    instance.setConfig = function (opt) {
+    self.setConfig = function (opt) {
         if (typeof opt == "object" && opt !== null) {
             for (var i in config) {
                 if (config.hasOwnProperty(i) && opt[i] !== undefined)
@@ -324,11 +324,11 @@ var WebRTC = (function (opt) {
         }
     };
 
-    instance.setConfig(opt);
+    self.setConfig(opt);
 
     if (config.autoInit) {
         setTimeout(function () {
-            instance.init();
+            self.init();
         }, 0);
     }
 
