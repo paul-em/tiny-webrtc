@@ -11,6 +11,7 @@
     </style>
 </head>
 <body>
+<div
 <video id="me" autoplay="autoplay"></video>
 
 <script src="webrtc-conference.js"></script>
@@ -34,6 +35,7 @@
         video.autoplay = "autoplay";
         video.id = "remote-" + userId;
         document.body.appendChild(video);
+        webRTC.sendData(userId, 'Hello!')
     });
 
     webRTC.onUserLeave(function (userId) {
@@ -43,6 +45,10 @@
             el.parentElement.removeChild(el);
         }
     });
+
+    webRTC.onData(function(userId, data){
+        console.log("data", userId, data);
+    })
 
 
 </script>

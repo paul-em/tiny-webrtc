@@ -2,6 +2,7 @@ var WebRTC = (function (opt) {
     "use strict";
     var connected = false,
         localStreamURL,
+        myId,
         localStream,
         peerConnections = {},
         socket,
@@ -52,7 +53,12 @@ var WebRTC = (function (opt) {
             mandatory: {
                 OfferToReceiveAudio: true,
                 OfferToReceiveVideo: true
-            }
+            },
+            optional: [
+                {
+                    RtpDataChannels: true
+                }
+            ]
         },
         roomParamType: "hash",
         roomParamName: "r",
@@ -122,6 +128,7 @@ var WebRTC = (function (opt) {
             if (data.success) {
                 if (data.data.users.length != 0) {
                     sendOffer(data.data.users);
+                    myId = data.data.userId;
                 }
                 stateChange(4);
             } else {
@@ -215,9 +222,10 @@ var WebRTC = (function (opt) {
     }
 
     function addPeerConnection(userId) {
-        peerConnections[userId] = (new RTCPeerConnection({iceServers: config.iceServers}, config.mediaConstraints));
+        var pc = new RTCPeerConnection({iceServers: config.iceServers}, config.mediaConstraints);
+        pc = new RTCPeerConnection({iceServers: config.iceServers}, config.mediaConstraints);
 
-        peerConnections[userId].onicecandidate = function (event) {
+        pc.onicecandidate = function (event) {
             if (event.candidate) {
                 socket.emit("iceCandidate",
                     {
@@ -231,25 +239,38 @@ var WebRTC = (function (opt) {
                     });
             }
         };
-        peerConnections[userId].onconnecting = function () {
+        pc.onconnecting = function () {
         };
-        peerConnections[userId].onopen = function () {
+        pc.onopen = function () {
         };
-        peerConnections[userId].onaddstream = function (event) {
-            peerConnections[userId].streamURL = getStreamUrl(event.stream);
-            peerConnections[userId].stream = event.stream;
+        pc.onaddstream = function (event) {
+            pc.streamURL = getStreamUrl(event.stream);
+            pc.stream = event.stream;
             userConnectCallback(userId);
             if (count(peerConnections) == 1) {
                 stateChange(5);
             }
         };
-        peerConnections[userId].onremovestream = function () {
+        pc.onremovestream = function () {
             remove(userId);
         };
-        peerConnections[userId].addStream(localStream);
-        peerConnections[userId].userId = userId;
-        peerConnections[userId].streamURL = "";
-        peerConnections[userId].stream = "";
+        pc.ondatachannel = function(event){
+            var receiveChannel = event.channel;
+            receiveChannel.onmessage = function(event){
+
+            };
+        };
+
+        pc.addStream(localStream);
+        pc.streamURL = "";
+        pc.stream = "";
+        pc.RTCDataChannel = pc.createDataChannel("RTCDataChannel", {reliable: false});
+
+        pc.RTCDataChannel.onmessage = function(event){
+            dataCallback(userId, event.data);
+        };
+
+        peerConnections[userId] = pc;
     }
 
     function getStreamUrl(stream){
@@ -350,6 +371,18 @@ var WebRTC = (function (opt) {
 
     self.getRoom = function () {
         return config.room;
+    };
+
+    self.sendData = function(userId, data){
+        if(peerConnections[userId]){
+            if(peerConnections[userId].RTCDataChannel.readyState == "open"){
+                peerConnections[userId].RTCDataChannel.send(data);
+            } else {
+                setTimeout(function(){
+                    self.sendData(userId,data);
+                },100)
+            }
+        }
     };
 
     self.setConfig = function (opt) {
