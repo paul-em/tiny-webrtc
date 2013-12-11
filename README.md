@@ -44,7 +44,7 @@ You can also pass options as constructor at the beginning.
 
 - **wsServer** String *(default:'http://localhost:8080')* - the address of the server where socket.io is running
 - **wsServerScript** String *(default:'/socket.io/socket.io.js')* - the path to the socket script. Usually you can leave this as is.
-- **iceServers** Arraz *(default:[{"url": "stun:stun.l.google.com:19302"}])* - stun servers to get the best connection between you and your partner. Leave this as is, if you don't know how to create your own.
+- **iceServers** Array *(default:[{"url": "stun:stun.l.google.com:19302"}])* - stun servers to get the best connection between you and your partner. Leave this as is, if you don't know how to create your own.
 - **mediaConstraints** Object *(default:{ mandatory: { OfferToReceiveAudio: true, OfferToReceiveVideo: true } })* - list of devices you want to access.
 - **roomParamType** String *(default:'hash')* - choose 'hash', 'search', or 'off' to decide how to pass your room number
 - **roomParamName** String *(default:'r')* - parameter name to be shown in the address bar
