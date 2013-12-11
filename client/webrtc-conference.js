@@ -211,7 +211,6 @@ var WebRTC = (function (opt) {
             });
         } else {
             error(1);
-
         }
     }
 
@@ -237,7 +236,7 @@ var WebRTC = (function (opt) {
         peerConnections[userId].onopen = function () {
         };
         peerConnections[userId].onaddstream = function (event) {
-            peerConnections[userId].streamURL = window.URL.createObjectURL(event.stream) || event.stream;
+            peerConnections[userId].streamURL = getStreamUrl(event.stream);
             peerConnections[userId].stream = event.stream;
             userConnectCallback(userId);
             if (count(peerConnections) == 1) {
@@ -253,6 +252,15 @@ var WebRTC = (function (opt) {
         peerConnections[userId].stream = "";
     }
 
+    function getStreamUrl(stream){
+        var url;
+        try {
+            url = window.URL.createObjectURL(stream) || stream;
+        } catch (e){
+            url = stream;
+        }
+        return url;
+    }
 
     function stateChange(new_state) {
         state = new_state;
@@ -275,7 +283,7 @@ var WebRTC = (function (opt) {
                 stateChange(2);
                 getLocalStream(function (localMediaStream) {
                     cameraAccess = true;
-                    localStreamURL = window.URL.createObjectURL(localMediaStream) || localMediaStream;
+                    localStreamURL = getStreamUrl(localMediaStream);
                     localStream = localMediaStream;
                     stateChange(3);
                     setSocketListener();
