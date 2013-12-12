@@ -36,6 +36,7 @@ webRTC.joinRoom(room); // joins any room (string or int) and leaves previous roo
 webRTC.leaveRoom(); // leave current room and stop remoteStreams
 webRTC.getRoom(); // returns current room name
 webRTC.setConfig(opt); // set config like in constructor
+webRTC.sendData(userId, data); // send strings
 ```
 
 ## Config Options
