@@ -13,6 +13,7 @@
   ],
   "license": "MIT",
   "ignore": [
+    "**/.*",
     "client/sample.html",
     "server",
     "test"
