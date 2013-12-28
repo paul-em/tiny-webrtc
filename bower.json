@@ -9,7 +9,7 @@
     "main": {
         "./webrtc-conference": "./client/webrtc-conference.js",
         "./socket.io.js": "./server/node_modules/socket.io-client/dist/socket.io.js",
-        "socket.io.min.js": "./server/node_modules/socket.io-client/dist/socket.io.min.js"
+        "./socket.io.min.js": "./server/node_modules/socket.io-client/dist/socket.io.min.js"
     },
     "keywords": [
         "webrtc",
@@ -21,8 +21,7 @@
     "ignore": [
         "**/.*",
         "*.html",
-        "server/!(socket.io.js)",
-        "server/!(socket.io.min.js)",
+        "server",
         "test"
     ]
 }
