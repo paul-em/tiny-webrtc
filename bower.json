@@ -6,11 +6,11 @@
         "Paul Em <paul3m@gmail.com>"
     ],
     "description": "tiny webrtc layer for client and server",
-    "main": {
-        "./webrtc-conference": "./client/webrtc-conference.js",
-        "./socket.io.js": "./server/node_modules/socket.io-client/dist/socket.io.js",
-        "./socket.io.min.js": "./server/node_modules/socket.io-client/dist/socket.io.min.js"
-    },
+    "main": [
+        "./client/webrtc-conference.js",
+        "./server/node_modules/socket.io-client/dist/socket.io.js",
+        "./server/node_modules/socket.io-client/dist/socket.io.min.js"
+    ],
     "keywords": [
         "webrtc",
         "websocket",
@@ -21,7 +21,6 @@
     "ignore": [
         "**/.*",
         "*.html",
-        "server",
         "test"
     ]
 }
