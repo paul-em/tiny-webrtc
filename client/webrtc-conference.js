@@ -43,7 +43,7 @@ var WebRTC = (function (opt) {
 
     var config = {
         wsServer: 'http://localhost:8080',  // websocket server
-        wsServerScript: '/socket.io/socket.io.js',
+        wsServerScript: 'http://localhost:8080/socket.io/socket.io.js',
         iceServers: [
             {"url": "stun:stun.l.google.com:19302"}
         ],
@@ -305,7 +305,7 @@ var WebRTC = (function (opt) {
             init = true;
             stateChange(1);
             setCrossBrowserAPI();
-            getScript(config.wsServer + config.wsServerScript);
+            getScript(config.wsServerScript);
             onSocketScriptLoad(function () {
                 wsScriptLoaded = true;
                 stateChange(2);
