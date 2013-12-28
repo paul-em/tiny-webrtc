@@ -7,6 +7,8 @@ The aim of this project is, to offer a lightweight wrapper for the WebRTC API. I
 
 This Project is still under development and change requests are welcome!
 
+The code is only tested in latest Chrome, since it is used in a Chrome Packaged App.
+
 ## Usage
 
 As shown in the sample.html (client/sample.html) you can create a webRTC Object by calling 
