@@ -1,23 +1,27 @@
 {
-  "name": "tiny-webrtc",
-  "version": "1.0.1",
-  "homepage": "https://github.com/paul-em/tiny-webrtc",
-  "authors": [
-    "Paul Em <paul3m@gmail.com>"
-  ],
-  "description": "tiny webrtc layer for client and server",
-  "main": "./client/webrtc-conference.js",
-  "keywords": [
-    "webrtc",
-    "websocket",
-    "small",
-    "layer"
-  ],
-  "license": "MIT",
-  "ignore": [
-    "**/.*",
-    "*.html",
-    "server",
-    "test"
-  ]
+    "name": "tiny-webrtc",
+    "version": "1.0.1",
+    "homepage": "https://github.com/paul-em/tiny-webrtc",
+    "authors": [
+        "Paul Em <paul3m@gmail.com>"
+    ],
+    "description": "tiny webrtc layer for client and server",
+    "main": [
+        "./client/webrtc-conference.js",
+        "./server/node_modules/socket.io-client/dist/socket.io.js",
+        "./server/node_modules/socket.io-client/dist/socket.io.min.js"
+    ],
+    "keywords": [
+        "webrtc",
+        "websocket",
+        "small",
+        "layer"
+    ],
+    "license": "MIT",
+    "ignore": [
+        "**/.*",
+        "*.html",
+        "server",
+        "test"
+    ]
 }
