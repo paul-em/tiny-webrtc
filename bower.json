@@ -11,11 +11,5 @@
     "webrtc",
     "websocket"
   ],
-  "license": "MIT",
-  "ignore": [
-    "**/.*",
-    "client/sample.html",
-    "server",
-    "test"
-  ]
+  "license": "MIT"
 }
