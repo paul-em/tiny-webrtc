@@ -21,7 +21,8 @@
     "ignore": [
         "**/.*",
         "*.html",
-        "server",
+        "./server/!(socket.io.js)",
+        "./server/!(socket.io.min.js)",
         "test"
     ]
 }
