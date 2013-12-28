@@ -32,16 +32,14 @@ var WebRTC = (function (opt) {
             "leaving room on server failed"
         ];
 
-    var stateChangeCallback = function (a, b) {
-        },
-        userConnectCallback = function (a) {
-        },
-        userLeaveCallback = function (a) {
-        },
-        dataCallback = function (a, b) {
-        },
-        errorCallback = function (a, b) {
-        };
+    var events = {
+        stateChange: [],
+        userConnect: [],
+        userLeave: [],
+        data: [],
+        error: []
+    };
+
 
     var config = {
         wsServer: 'http://localhost:8080',  // websocket server
@@ -67,6 +65,14 @@ var WebRTC = (function (opt) {
         room: generateRoomName()
     };
 
+
+    function dispatchEvent(name, param1, param2){
+         for(var i in events[name]){
+             if(events[name].hasOwnProperty(i) && typeof events[name][i] == "function"){
+                 events[name][i](param1, param2);
+             }
+         }
+    }
 
     function getURLParameter(name) {
         var a = new RegExp(name + '=' + '(.+?)(&|$)').exec(location[config.roomParamType]);
@@ -140,10 +146,10 @@ var WebRTC = (function (opt) {
     function remove(userId) {
         if (peerConnections[userId]) {
             delete peerConnections[userId];
-            userLeaveCallback(userId);
+            dispatchEvent("userLeave", userId);
 
             if (count(peerConnections) === 0) {
-                stateChangeCallback(4, "ready - waiting for partners to join");
+                dispatchEvent('stateChange', 4, "ready - waiting for partners to join");
             }
         }
     }
@@ -246,7 +252,7 @@ var WebRTC = (function (opt) {
         pc.onaddstream = function (event) {
             pc.streamURL = getStreamUrl(event.stream);
             pc.stream = event.stream;
-            userConnectCallback(userId);
+            dispatchEvent("userConnect", userId);
             if (count(peerConnections) == 1) {
                 stateChange(5);
             }
@@ -254,9 +260,9 @@ var WebRTC = (function (opt) {
         pc.onremovestream = function () {
             remove(userId);
         };
-        pc.ondatachannel = function(event){
+        pc.ondatachannel = function (event) {
             var receiveChannel = event.channel;
-            receiveChannel.onmessage = function(event){
+            receiveChannel.onmessage = function (event) {
 
             };
         };
@@ -266,18 +272,18 @@ var WebRTC = (function (opt) {
         pc.stream = "";
         pc.RTCDataChannel = pc.createDataChannel("RTCDataChannel", {reliable: false});
 
-        pc.RTCDataChannel.onmessage = function(event){
-            dataCallback(userId, event.data);
+        pc.RTCDataChannel.onmessage = function (event) {
+            dispatchEvent('data',userId, event.data);
         };
 
         peerConnections[userId] = pc;
     }
 
-    function getStreamUrl(stream){
+    function getStreamUrl(stream) {
         var url;
         try {
             url = window.URL.createObjectURL(stream) || stream;
-        } catch (e){
+        } catch (e) {
             url = stream;
         }
         return url;
@@ -285,11 +291,11 @@ var WebRTC = (function (opt) {
 
     function stateChange(new_state) {
         state = new_state;
-        stateChangeCallback(state, states[state]);
+        dispatchEvent('stateChange', state, states[state]);
     }
 
     function error(state) {
-        errorCallback(state, errors[state]);
+        dispatchEvent('error', state, errors[state]);
     }
 
 
@@ -315,23 +321,23 @@ var WebRTC = (function (opt) {
 
 
     self.onStateChange = function (callback) {
-        stateChangeCallback = callback;
+        events.stateChange.push(callback);
     };
 
     self.onUserConnect = function (callback) {
-        userConnectCallback = callback;
+        events.userConnect.push(callback);
     };
 
     self.onUserLeave = function (callback) {
-        userLeaveCallback = callback;
+        events.userLeave.push(callback);
     };
 
     self.onData = function (callback) {
-        dataCallback = callback;
+        events.data.push(callback);
     };
 
     self.onError = function (callback) {
-        errorCallback = callback;
+        events.error.push(callback);
     };
 
     self.getRemoteStream = function (userId) {
@@ -373,14 +379,14 @@ var WebRTC = (function (opt) {
         return config.room;
     };
 
-    self.sendData = function(userId, data){
-        if(peerConnections[userId]){
-            if(peerConnections[userId].RTCDataChannel.readyState == "open"){
+    self.sendData = function (userId, data) {
+        if (peerConnections[userId]) {
+            if (peerConnections[userId].RTCDataChannel.readyState == "open") {
                 peerConnections[userId].RTCDataChannel.send(data);
             } else {
-                setTimeout(function(){
-                    self.sendData(userId,data);
-                },100)
+                setTimeout(function () {
+                    self.sendData(userId, data);
+                }, 100)
             }
         }
     };
