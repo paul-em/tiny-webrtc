@@ -149,7 +149,8 @@ var WebRTC = (function (opt) {
             dispatchEvent("userLeave", userId);
 
             if (count(peerConnections) === 0) {
-                dispatchEvent('stateChange', 4, "ready - waiting for partners to join");
+                stateChange(4);
+
             }
         }
     }
@@ -391,6 +392,10 @@ var WebRTC = (function (opt) {
         }
     };
 
+    self.getMyId = function(){
+        return myId;
+    };
+
     self.setConfig = function (opt) {
         if (typeof opt == "object" && opt !== null) {
             for (var i in config) {
@@ -399,6 +404,8 @@ var WebRTC = (function (opt) {
             }
         }
     };
+
+
 
     self.setConfig(opt);
 
