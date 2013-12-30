@@ -414,6 +414,13 @@ var WebRTC = (function (opt) {
         }
     };
 
+    self.sendDataAll = function (data) {
+        for (var i in peerConnections) {
+            if (peerConnections.hasOwnProperty(i))
+                self.sendData(i, data);
+        }
+    };
+
     self.getMyId = function () {
         return myId;
     };
