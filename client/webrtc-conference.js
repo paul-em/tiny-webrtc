@@ -274,7 +274,13 @@ var WebRTC = (function (opt) {
         pc.RTCDataChannel = pc.createDataChannel("RTCDataChannel", {reliable: false});
 
         pc.RTCDataChannel.onmessage = function (event) {
-            dispatchEvent('data',userId, JSON.parse(event.data));
+            var data = event.data;
+            try{
+                data = JSON.parse(data);
+            } catch (e){
+
+            }
+            dispatchEvent('data',userId, data);
         };
 
         peerConnections[userId] = pc;
@@ -383,10 +389,13 @@ var WebRTC = (function (opt) {
     self.sendData = function (userId, data) {
         if (peerConnections[userId]) {
             if (peerConnections[userId].RTCDataChannel.readyState == "open") {
+                if(typeof data == "object"){
+                    data = JSON.stringify(data);
+                }
                 peerConnections[userId].RTCDataChannel.send(data);
             } else {
                 setTimeout(function () {
-                    self.sendData(userId, JSON.stringify(data));
+                    self.sendData(userId, data);
                 }, 100)
             }
         }
