@@ -1,5 +1,5 @@
 {
-    "name": "tiny-webrtc",
+    "name": "tinywebrtc",
     "author": "Paul Emathinger <paul@emathinger.at>",
     "description": "a socket.io webrtc server for managing rooms and exchaning iceCandidates",
     "contributors": [
@@ -15,13 +15,13 @@
     "scripts": {
         "start": "app.js"
     },
-    "version": "0.0.1-1",
+    "version": "0.0.1-2",
     "engine": "node 0.10.x",
     "dependencies": {
         "socket.io": "0.9.16"
     },
     "license": "MIT",
-    "subdomain": "tinywebrtc-server",
+    "subdomain": "tinywebrtc",
     "engines": {
         "node": "0.10.x"
     }

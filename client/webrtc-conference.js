@@ -274,7 +274,7 @@ var WebRTC = (function (opt) {
         pc.RTCDataChannel = pc.createDataChannel("RTCDataChannel", {reliable: false});
 
         pc.RTCDataChannel.onmessage = function (event) {
-            dispatchEvent('data',userId, event.data);
+            dispatchEvent('data',userId, JSON.parse(event.data));
         };
 
         peerConnections[userId] = pc;
@@ -386,7 +386,7 @@ var WebRTC = (function (opt) {
                 peerConnections[userId].RTCDataChannel.send(data);
             } else {
                 setTimeout(function () {
-                    self.sendData(userId, data);
+                    self.sendData(userId, JSON.stringify(data));
                 }, 100)
             }
         }
