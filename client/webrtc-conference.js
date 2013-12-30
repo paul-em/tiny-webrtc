@@ -273,7 +273,7 @@ var WebRTC = (function (opt) {
         pc.RTCDataChannel = pc.createDataChannel("RTCDataChannel", {reliable: false});
 
         pc.RTCDataChannel.onmessage = function (event) {
-            var data = event.data;
+            var data = decodeURI(event.data);
             try {
                 data = JSON.parse(data);
             } catch (e) {
@@ -405,6 +405,7 @@ var WebRTC = (function (opt) {
                 if (typeof data == "object") {
                     data = JSON.stringify(data);
                 }
+                data = encodeURI(data);
                 peerConnections[userId].RTCDataChannel.send(data);
             } else {
                 setTimeout(function () {
