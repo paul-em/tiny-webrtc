@@ -57,6 +57,20 @@ describe("Server", function () {
             }, "it should callback a response", 3000);
         });
 
+        it("should return my id", function(){
+           var done = false;
+            runs(function(){
+               socket.emit("getUserId", {}, function(data){
+                   done = true;
+                   expect(data.success).toBeTruthy();
+                   userId = data.data.userId;
+               })
+            });
+
+            waitsFor(function(){
+                return done;
+            }, "it should callback a response", 3000);
+        });
 
         it("should join my room and tell me there are no users in the room", function () {
             var done = false;
@@ -67,8 +81,7 @@ describe("Server", function () {
                     expect(data.error).toBeNull();
                     expect(data.data.users).toBeDefined();
                     expect(data.data.users.length).toEqual(0);
-                    expect(data.data.userId).toBeDefined();
-                    userId = data.data.userId;
+
                 });
             });
 
@@ -284,8 +297,6 @@ describe("Server", function () {
                     expect(data.error).toBeNull();
                     expect(data.data.users).toBeDefined();
                     expect(data.data.users.length).toEqual(0);
-                    expect(data.data.userId).toBeDefined();
-                    userId = data.data.userId;
                 });
             });
 

@@ -12,6 +12,7 @@ console.log("info: listening on port " + port);
 
 // global variables
 var userCounter = 0;
+var roomLimit = 5;
 var noop = function () {
 };
 
@@ -32,6 +33,11 @@ io.sockets.on('connection',
             $emit.apply(socket, arguments);
         };
 
+        socket.on('getUserId', function(data, callback){
+            callback = callback || noop;
+            callback({success: true, error: null, data: {userId: socket.userId}});
+
+        });
 
         socket.on('joinRoom', function (data, callback) {
             callback = callback || noop;
@@ -48,6 +54,10 @@ io.sockets.on('connection',
 
             // create room if not exists
             var members = io.sockets.clients(data.room);
+            if(members.length >= roomLimit){
+                callback({success:false, error: "room full", data: null});
+                return;
+            }
             socket.join(data.room);
 
             // get members
@@ -60,7 +70,7 @@ io.sockets.on('connection',
             socket.room = data.room;
 
             // return users
-            callback({success: true, error: null, data: {users: userArray, userId: socket.userId}});
+            callback({success: true, error: null, data: {users: userArray}});
         });
 
         socket.on('leaveRoom', function (data, callback) {

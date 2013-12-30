@@ -8,7 +8,6 @@ describe("Client", function () {
         it("should overwrite the settings and not init automatically", function () {
             webRTC = new WebRTC({room: "myRoom", autoInit: false});
             expect(webRTC.getRoom()).toBe("myRoom");
-            expect(webRTC.getState()).toBe(0);
         });
 
         it("should overwrite the settings again", function () {
@@ -19,8 +18,6 @@ describe("Client", function () {
 
     describe("init", function () {
 
-
-
         var webRTC = new WebRTC();
         var access = false;
         window.navigator.getUserMedia = function (data, success, fail) {
@@ -30,51 +27,70 @@ describe("Client", function () {
             }, 400)
         };
 
+        var load = false;
+        webRTC.onLoad(function(){
+            load = true;
+        });
 
-        var state = 0;
-        webRTC.onStateChange(function (s) {
-            state = s;
+        var init = false;
+        webRTC.onInit(function(){
+            init = true;
+        });
+
+        var scriptLoaded = false;
+        webRTC.onScriptLoaded(function(){
+            scriptLoaded = true;
+        });
+
+        var cameraAccess = false;
+        webRTC.onCameraAccess(function(){
+           cameraAccess = true;
+        });
+
+        var ready = false;
+        webRTC.onReady(function(){
+            ready = true;
+        });
+
+        var roomJoin = false;
+        webRTC.onRoomJoin(function(){
+            roomJoin = true;
+        });
+
+        it('should set load state', function () {
+            waitsFor(function () {
+                return load;
+            }, "it should be able to load the socket script", 3000);
         });
 
         it('should set init state', function () {
             waitsFor(function () {
-                return state === 1;
+                return init;
             }, "it should auto init", 1000);
-
-            runs(function () {
-                expect(webRTC.getState()).toBe(1);
-            })
         });
 
         it('should set socket script loaded state', function () {
-
             waitsFor(function () {
-                return state === 2;
+                return scriptLoaded;
             }, "it should be able to load the socket script", 3000);
-
-            runs(function () {
-                expect(webRTC.getState()).toBe(2);
-            })
         });
 
         it('should access (mocked) camera', function () {
             waitsFor(function () {
-                return state === 3;
+                return cameraAccess;
             }, "it should call camera", 10000);
 
             runs(function () {
-                expect(webRTC.getState()).toBe(3);
                 expect(access).toBeTruthy();
             })
         });
 
-        it('should automatically join room', function () {
+        it('should join room and return value', function () {
             waitsFor(function () {
-                return state === 4;
-            }, "it switch state to 4", 10000);
+                return roomJoin;
+            }, "it should join room", 10000);
 
             runs(function () {
-                expect(webRTC.getState()).toBe(4);
                 expect(webRTC.getRoom()).toBeDefined();
             })
         });

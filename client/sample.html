@@ -15,7 +15,12 @@
 
 <script src="webrtc-conference.js"></script>
 <script>
-    var webRTC = new WebRTC();
+    var webRTC = new WebRTC({
+        wsServer: "http://tinywebrtc.nodejitsu.com/",
+        wsServerScript:"http://tinywebrtc.nodejitsu.com/socket.io/socket.io.js",
+        room: "test"
+    });
+
     webRTC.onStateChange(function (state, msg) {
         console.log(state, msg);
         if (state == 3) {

@@ -9,17 +9,8 @@ var WebRTC = (function (opt) {
         cameraAccess = false,
         wsScriptLoaded = false,
         self = this,
-        state = 0,
         init = false,
         socketScriptTries = 0,
-        states = [
-            "loaded",
-            "init",
-            "script loaded",
-            "camera/mic access",
-            "ready - waiting for partners to join",
-            "in videochat"
-        ],
         errors = [
             "unknown error",
             "no getUserMedia support on your browser :(",
@@ -29,11 +20,17 @@ var WebRTC = (function (opt) {
             "could not get socket script",
             "sending offer failed",
             "sending answer failed",
-            "leaving room on server failed"
+            "leaving room on server failed",
+            "room limit reached"
         ];
 
     var events = {
-        stateChange: [],
+        load: [],
+        init: [],
+        scriptLoaded: [],
+        cameraAccess: [],
+        ready: [],
+        roomJoin: [],
         userConnect: [],
         userLeave: [],
         data: [],
@@ -66,12 +63,12 @@ var WebRTC = (function (opt) {
     };
 
 
-    function dispatchEvent(name, param1, param2){
-         for(var i in events[name]){
-             if(events[name].hasOwnProperty(i) && typeof events[name][i] == "function"){
-                 events[name][i](param1, param2);
-             }
-         }
+    function dispatchEvent(name, param1, param2) {
+        for (var i in events[name]) {
+            if (events[name].hasOwnProperty(i) && typeof events[name][i] == "function") {
+                events[name][i](param1, param2);
+            }
+        }
     }
 
     function getURLParameter(name) {
@@ -87,14 +84,21 @@ var WebRTC = (function (opt) {
         }, 5000);
         socket.on("connect", function () {
             connected = true;
-            var register = {};
             var pRoom = getURLParameter(config.roomParamName);
             if (pRoom) {
                 config.room = pRoom;
             }
-            if (config.autoJoinRoom) {
-                joinRoom();
-            }
+            socket.emit("getUserId", {}, function (data) {
+                if (data.success) {
+                    myId = data.data.userId;
+                    dispatchEvent("ready", myId);
+                    if (config.autoJoinRoom) {
+                        joinRoom();
+                    }
+                } else {
+                    error(4);
+                }
+            })
         });
 
         socket.on("offer", function (data) {
@@ -134,11 +138,14 @@ var WebRTC = (function (opt) {
             if (data.success) {
                 if (data.data.users.length != 0) {
                     sendOffer(data.data.users);
-                    myId = data.data.userId;
                 }
-                stateChange(4);
+                dispatchEvent("roomJoin", config.room);
             } else {
-                error(4);
+                if (data.error == "room full") {
+                    error(9);
+                } else {
+                    error(4);
+                }
             }
         });
     }
@@ -147,11 +154,6 @@ var WebRTC = (function (opt) {
         if (peerConnections[userId]) {
             delete peerConnections[userId];
             dispatchEvent("userLeave", userId);
-
-            if (count(peerConnections) === 0) {
-                stateChange(4);
-
-            }
         }
     }
 
@@ -254,9 +256,6 @@ var WebRTC = (function (opt) {
             pc.streamURL = getStreamUrl(event.stream);
             pc.stream = event.stream;
             dispatchEvent("userConnect", userId);
-            if (count(peerConnections) == 1) {
-                stateChange(5);
-            }
         };
         pc.onremovestream = function () {
             remove(userId);
@@ -275,12 +274,12 @@ var WebRTC = (function (opt) {
 
         pc.RTCDataChannel.onmessage = function (event) {
             var data = event.data;
-            try{
+            try {
                 data = JSON.parse(data);
-            } catch (e){
+            } catch (e) {
 
             }
-            dispatchEvent('data',userId, data);
+            dispatchEvent('data', userId, data);
         };
 
         peerConnections[userId] = pc;
@@ -296,11 +295,6 @@ var WebRTC = (function (opt) {
         return url;
     }
 
-    function stateChange(new_state) {
-        state = new_state;
-        dispatchEvent('stateChange', state, states[state]);
-    }
-
     function error(state) {
         dispatchEvent('error', state, errors[state]);
     }
@@ -309,17 +303,17 @@ var WebRTC = (function (opt) {
     self.init = function () {
         if (!init) {
             init = true;
-            stateChange(1);
+            dispatchEvent("init");
             setCrossBrowserAPI();
             getScript(config.wsServerScript);
             onSocketScriptLoad(function () {
                 wsScriptLoaded = true;
-                stateChange(2);
+                dispatchEvent("scriptLoaded");
                 getLocalStream(function (localMediaStream) {
                     cameraAccess = true;
                     localStreamURL = getStreamUrl(localMediaStream);
                     localStream = localMediaStream;
-                    stateChange(3);
+                    dispatchEvent("cameraAccess", localStreamURL);
                     setSocketListener();
                 });
             });
@@ -327,8 +321,30 @@ var WebRTC = (function (opt) {
     };
 
 
-    self.onStateChange = function (callback) {
-        events.stateChange.push(callback);
+    // Event listener
+
+    self.onLoad = function (callback) {
+        events.load.push(callback);
+    };
+
+    self.onInit = function (callback) {
+        events.init.push(callback);
+    };
+
+    self.onScriptLoaded = function (callback) {
+        events.scriptLoaded.push(callback);
+    };
+
+    self.onCameraAccess = function (callback) {
+        events.cameraAccess.push(callback);
+    };
+
+    self.onReady = function (callback) {
+        events.ready.push(callback);
+    };
+
+    self.onRoomJoin = function (callback) {
+        events.roomJoin.push(callback);
     };
 
     self.onUserConnect = function (callback) {
@@ -347,6 +363,7 @@ var WebRTC = (function (opt) {
         events.error.push(callback);
     };
 
+
     self.getRemoteStream = function (userId) {
         if (peerConnections[userId]) {
             return peerConnections[userId].streamURL;
@@ -357,10 +374,6 @@ var WebRTC = (function (opt) {
 
     self.getLocalStream = function () {
         return localStreamURL;
-    };
-
-    self.getState = function () {
-        return state;
     };
 
     self.joinRoom = function (room) {
@@ -389,7 +402,7 @@ var WebRTC = (function (opt) {
     self.sendData = function (userId, data) {
         if (peerConnections[userId]) {
             if (peerConnections[userId].RTCDataChannel.readyState == "open") {
-                if(typeof data == "object"){
+                if (typeof data == "object") {
                     data = JSON.stringify(data);
                 }
                 peerConnections[userId].RTCDataChannel.send(data);
@@ -401,7 +414,7 @@ var WebRTC = (function (opt) {
         }
     };
 
-    self.getMyId = function(){
+    self.getMyId = function () {
         return myId;
     };
 
@@ -415,9 +428,10 @@ var WebRTC = (function (opt) {
     };
 
 
-
     self.setConfig(opt);
-
+    setTimeout(function () {
+        dispatchEvent("load");
+    }, 0);
     if (config.autoInit) {
         setTimeout(function () {
             self.init();
