@@ -14,7 +14,12 @@ The code is only tested in latest Chrome, since it is used in a Chrome Packaged 
 
 Grab one of the files from the dist folder.
 
-Bower support coming soon!
+### Bower
+```
+$ bower install https://github.com/paul-em/tiny-webrtc.git
+```
+bower_components/tiny-webrtc/dist/tiny-webrtc.min.js
+
 
 
 ## Usage
