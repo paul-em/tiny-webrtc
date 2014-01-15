@@ -1,9 +1,9 @@
 ## tiny webRTC
 
 
-WebRTC is (or should be) native in modern browsers. SO why would an API Wrap need tons of depenedencies?
-
-The aim of this project is, to offer a lightweight wrapper for the WebRTC API. It also offers the code for the webserver to establish the initial peer2peer connection.
+WebRTC is a brand new technology for the Web that allows users to establish a peer-to-peer connection and share video, audio and data. In contrast to previous techniques this allows much higher data speeds without a server in the middle that can easily be a bottleneck for applications with a large number of users.
+The area of application for this new technique is significant and reaches from simple chat applications to complex video chat programs with the ability to send files and share the screen.
+However it is not an easy way to implement WebRTC for the browser and requieres some server-side work as well to establish the connection. The plugin tiny-webrtc was developed for this purpose and provides a simple API that can be used by virtually anyone.
 
 This Project is still under development and change requests are welcome!
 
@@ -51,7 +51,6 @@ webRTC.sendData(userId, data); // send strings
 You can also pass options as constructor at the beginning.
 
 - **wsServer** String *(default:'http://localhost:8080')* - the address of the server where socket.io is running
-- **wsServerScript** String *(default:'/socket.io/socket.io.js')* - the path to the socket script. Usually you can leave this as is.
 - **iceServers** Array *(default:[{"url": "stun:stun.l.google.com:19302"}])* - stun servers to get the best connection between you and your partner. Leave this as is, if you don't know how to create your own.
 - **mediaConstraints** Object *(default:{ mandatory: { OfferToReceiveAudio: true, OfferToReceiveVideo: true } })* - list of devices you want to access.
 - **roomParamType** String *(default:'hash')* - choose 'hash', 'search', or 'off' to decide how to pass your room number

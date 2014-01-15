@@ -5,7 +5,7 @@ var rename = require('gulp-rename');
 var concat = require('gulp-concat');
 
 gulp.task('default', function(){
-  gulp.src('./ib/*.js')
+  gulp.src('./lib/*.js')
     .pipe(concat('tiny-webrtc.min.js'))
     .pipe(uglify())
     .pipe(gulp.dest('./dist'));
