@@ -9,4 +9,8 @@ gulp.task('default', function(){
     .pipe(concat('tiny-webrtc.min.js'))
     .pipe(uglify())
     .pipe(gulp.dest('./dist'));
+
+  gulp.src('./lib/*.js')
+    .pipe(concat('tiny-webrtc.js'))
+    .pipe(gulp.dest('./dist'));
 });
