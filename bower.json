@@ -7,9 +7,8 @@
     ],
     "description": "tiny webrtc layer for client and server",
     "main": [
-        "./client/webrtc-conference.js",
-        "./server/node_modules/socket.io-client/dist/socket.io.js",
-        "./server/node_modules/socket.io-client/dist/socket.io.min.js"
+        "./webrtc-conference.js",
+        "./lib/socket.io.min.js"
     ],
     "keywords": [
         "webrtc",

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sample WebRTC Conference</title>
+    <meta charset="utf-8">
+    <style>
+        #me {
+            transform: scaleX(-1);
+            -webkit-transform: scaleX(-1);
+        }
+    </style>
+</head>
+<body>
+<video id="me" autoplay="autoplay"></video>
+
+<script src="dist/webrtc-conference.min.js"></script>
+<script>
+    /*var webRTC = new WebRTC({
+        wsServer: "http://tinywebrtc.nodejitsu.com/",
+        wsServerScript:"http://tinywebrtc.nodejitsu.com/socket.io/socket.io.js",
+        room: "test"
+    }); */
+
+    var webRTC = new WebRTC();
+
+    webRTC.onCameraAccess(function (stream) {
+        document.getElementById("me").src = stream;
+    });
+
+    webRTC.onError(function (id, msg) {
+        console.error(msg);
+    });
+
+    webRTC.onUserConnect(function (userId) {
+        console.log("userConnect", userId);
+        var video = document.createElement('video');
+        video.src = webRTC.getRemoteStream(userId);
+        video.autoplay = "autoplay";
+        video.id = "remote-" + userId;
+        document.body.appendChild(video);
+        webRTC.sendData(userId, 'Hello!')
+    });
+
+    webRTC.onUserLeave(function (userId) {
+        console.log("userLeave", userId);
+        var el = document.getElementById("remote-" + userId);
+        if(el){
+            el.parentElement.removeChild(el);
+        }
+    });
+
+    webRTC.onData(function(userId, data){
+        console.log("data", userId, data);
+    })
+
+
+</script>
+</body>
+</html>
