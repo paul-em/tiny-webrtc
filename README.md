@@ -9,6 +9,14 @@ This Project is still under development and change requests are welcome!
 
 The code is only tested in latest Chrome, since it is used in a Chrome Packaged App.
 
+
+## Installation
+
+Grab one of the files from the dist folder.
+
+Bower support coming soon!
+
+
 ## Usage
 
 As shown in the sample.html (client/sample.html) you can create a webRTC Object by calling 
