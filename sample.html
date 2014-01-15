@@ -11,20 +11,27 @@
     </style>
 </head>
 <body>
+<div>Room: <span id="room">connecting...</span></div>
 <video id="me" autoplay="autoplay"></video>
 
-<script src="dist/webrtc-conference.min.js"></script>
+<script src="dist/tiny-webrtc.min.js"></script>
 <script>
-    /*var webRTC = new WebRTC({
-        wsServer: "http://tinywebrtc.nodejitsu.com/",
-        wsServerScript:"http://tinywebrtc.nodejitsu.com/socket.io/socket.io.js",
-        room: "test"
-    }); */
-
-    var webRTC = new WebRTC();
+    var webRTC = new WebRTC({
+        wsServer: "http://tinywebrtc.nodejitsu.com/"
+    });
 
     webRTC.onCameraAccess(function (stream) {
         document.getElementById("me").src = stream;
+        console.log("camera access");
+    });
+
+    webRTC.onRoomJoin(function (room) {
+        document.getElementById("room").innerHTML = room;
+        console.log("joined room")
+    });
+
+    webRTC.onConnect(function (userId) {
+        console.log("ready my userId",userId);
     });
 
     webRTC.onError(function (id, msg) {
@@ -44,12 +51,12 @@
     webRTC.onUserLeave(function (userId) {
         console.log("userLeave", userId);
         var el = document.getElementById("remote-" + userId);
-        if(el){
+        if (el) {
             el.parentElement.removeChild(el);
         }
     });
 
-    webRTC.onData(function(userId, data){
+    webRTC.onData(function (userId, data) {
         console.log("data", userId, data);
     })
 
