@@ -3938,7 +3938,7 @@ var WebRTC = (function (opt) {
     socket = io.connect(config.wsServer);
     setTimeout(function () {
       if (!connected)
-        error("connecting to server failed");
+        dispatchEvent('error',"connecting to server failed");
     }, 5000);
     socket.on("connect", function () {
       connected = true;
@@ -3954,7 +3954,7 @@ var WebRTC = (function (opt) {
             joinRoom();
           }
         } else {
-          error("getting userId failed");
+          dispatchEvent('error',"getting userId failed");
         }
       })
     });
@@ -3969,7 +3969,7 @@ var WebRTC = (function (opt) {
           answer: sessionDescription
         }, function (re) {
           if (!re.success)
-            error("sending answer failed");
+            dispatchEvent('error',"sending answer failed");
         });
       }, null, config.mediaConstraints);
     });
@@ -4000,9 +4000,9 @@ var WebRTC = (function (opt) {
         dispatchEvent("roomJoin", config.room);
       } else {
         if (data.error == "room full") {
-          error("room limit reached");
+          dispatchEvent('error',"room limit reached");
         } else {
-          error("joining room on server failed");
+          dispatchEvent('error',"joining room on server failed");
         }
       }
     });
@@ -4030,7 +4030,7 @@ var WebRTC = (function (opt) {
         offer: sessionDescription
       }, function (re) {
         if (!re.success) {
-          error("sending answer failed");
+          dispatchEvent('error',"sending answer failed");
         }
       });
       peerConnections[userId].setLocalDescription(sessionDescription);
@@ -4068,10 +4068,10 @@ var WebRTC = (function (opt) {
     if (navigator.getUserMedia) {
       var channels = {video: true, audio: true};
       navigator.getUserMedia(channels, callback, function () {
-        error("An Error occured while accessing your camera and microphone. Please reload this page");
+        dispatchEvent('error',"An Error occured while accessing your camera and microphone. Please reload this page");
       });
     } else {
-      error("no getUserMedia support on your browser :(");
+      dispatchEvent('error',"no getUserMedia support on your browser :(");
     }
   }
 
@@ -4139,11 +4139,6 @@ var WebRTC = (function (opt) {
     }
     return url;
   }
-
-  function error(state) {
-    dispatchEvent('error', state, errors[state]);
-  }
-
 
   self.init = function () {
     if (!init) {
@@ -4227,7 +4222,7 @@ var WebRTC = (function (opt) {
       if (data.success) {
         config.room = null;
       } else {
-        error("leaving room on server failed");
+        dispatchEvent('error',"leaving room on server failed");
       }
     });
   };
