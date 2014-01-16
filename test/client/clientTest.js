@@ -38,7 +38,7 @@ describe("Client", function () {
         });
 
         var scriptLoaded = false;
-        webRTC.onScriptLoaded(function(){
+        webRTC.onLoad(function(){
             scriptLoaded = true;
         });
 
@@ -48,7 +48,7 @@ describe("Client", function () {
         });
 
         var ready = false;
-        webRTC.onReady(function(){
+        webRTC.onConnect(function(){
             ready = true;
         });
 

@@ -3880,6 +3880,7 @@ var WebRTC = (function (opt) {
     peerConnections = {},
     socket,
     cameraAccess = false,
+    joinRoomOnConnect = false,
     self = this,
     init = false;
 
@@ -3938,7 +3939,7 @@ var WebRTC = (function (opt) {
     socket = io.connect(config.wsServer);
     setTimeout(function () {
       if (!connected)
-        dispatchEvent('error',"connecting to server failed");
+        dispatchEvent('error', "connecting to server failed");
     }, 5000);
     socket.on("connect", function () {
       connected = true;
@@ -3950,11 +3951,11 @@ var WebRTC = (function (opt) {
         if (data.success) {
           myId = data.data.userId;
           dispatchEvent("connect", myId);
-          if (config.autoJoinRoom) {
+          if (config.autoJoinRoom || joinRoomOnConnect) {
             joinRoom();
           }
         } else {
-          dispatchEvent('error',"getting userId failed");
+          dispatchEvent('error', "getting userId failed");
         }
       })
     });
@@ -3969,7 +3970,7 @@ var WebRTC = (function (opt) {
           answer: sessionDescription
         }, function (re) {
           if (!re.success)
-            dispatchEvent('error',"sending answer failed");
+            dispatchEvent('error', "sending answer failed");
         });
       }, null, config.mediaConstraints);
     });
@@ -3992,20 +3993,26 @@ var WebRTC = (function (opt) {
   }
 
   function joinRoom() {
-    socket.emit("joinRoom", {room: config.room}, function (data) {
-      if (data.success) {
-        if (data.data.users.length != 0) {
-          sendOffer(data.data.users);
-        }
-        dispatchEvent("roomJoin", config.room);
-      } else {
-        if (data.error == "room full") {
-          dispatchEvent('error',"room limit reached");
-        } else {
-          dispatchEvent('error',"joining room on server failed");
-        }
+    if (socket) {
+      if (config.room !== null) {
+        socket.emit("joinRoom", {room: config.room}, function (data) {
+          if (data.success) {
+            if (data.data.users.length != 0) {
+              sendOffer(data.data.users);
+            }
+            dispatchEvent("roomJoin", config.room);
+          } else {
+            if (data.error == "room full") {
+              dispatchEvent('error', "room limit reached");
+            } else {
+              dispatchEvent('error', "joining room on server failed");
+            }
+          }
+        });
       }
-    });
+    } else {
+      joinRoomOnConnect = true;
+    }
   }
 
   function remove(userId) {
@@ -4030,7 +4037,7 @@ var WebRTC = (function (opt) {
         offer: sessionDescription
       }, function (re) {
         if (!re.success) {
-          dispatchEvent('error',"sending answer failed");
+          dispatchEvent('error', "sending answer failed");
         }
       });
       peerConnections[userId].setLocalDescription(sessionDescription);
@@ -4068,10 +4075,10 @@ var WebRTC = (function (opt) {
     if (navigator.getUserMedia) {
       var channels = {video: true, audio: true};
       navigator.getUserMedia(channels, callback, function () {
-        dispatchEvent('error',"An Error occured while accessing your camera and microphone. Please reload this page");
+        dispatchEvent('error', "An Error occured while accessing your camera and microphone. Please reload this page");
       });
     } else {
-      dispatchEvent('error',"no getUserMedia support on your browser :(");
+      dispatchEvent('error', "no getUserMedia support on your browser :(");
     }
   }
 
@@ -4218,13 +4225,17 @@ var WebRTC = (function (opt) {
       if (peerConnections.hasOwnProperty(i))
         peerConnections[i].stream.stop();
     }
-    socket.emit("leaveRoom", null, function (data) {
-      if (data.success) {
-        config.room = null;
-      } else {
-        dispatchEvent('error',"leaving room on server failed");
-      }
-    });
+    if (socket) {
+      socket.emit("leaveRoom", null, function (data) {
+        if (data.success) {
+          config.room = null;
+        } else {
+          dispatchEvent('error', "leaving room on server failed");
+        }
+      });
+    } else {
+      config.room = null;
+    }
   };
 
   self.getRoom = function () {
