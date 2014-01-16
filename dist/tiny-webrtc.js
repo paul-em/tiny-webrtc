@@ -3899,7 +3899,7 @@ var WebRTC = (function (opt) {
 
 
   var config = {
-    wsServer: 'http://localhost:8080',  // websocket server
+    wsServer: 'http://tinywebrtc.nodejitsu.com/',  // websocket server
     iceServers: [
       {"url": "stun:stun.l.google.com:19302"}
     ],
@@ -4216,14 +4216,24 @@ var WebRTC = (function (opt) {
   };
 
   self.joinRoom = function (room) {
-    config.room = room;
-    joinRoom();
+    if (config.room !== null) {
+      self.leaveRoom(function () {
+        config.room = room;
+        joinRoom();
+      });
+    } else {
+      config.room = room;
+      joinRoom();
+    }
   };
 
-  self.leaveRoom = function () {
+  self.leaveRoom = function (callback) {
+    callback = callback || function () {
+    };
     for (var i in peerConnections) {
-      if (peerConnections.hasOwnProperty(i))
+      if (peerConnections.hasOwnProperty(i)) {
         peerConnections[i].stream.stop();
+      }
     }
     if (socket) {
       socket.emit("leaveRoom", null, function (data) {
@@ -4232,6 +4242,7 @@ var WebRTC = (function (opt) {
         } else {
           dispatchEvent('error', "leaving room on server failed");
         }
+        callback();
       });
     } else {
       config.room = null;
