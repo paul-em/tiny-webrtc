@@ -14,10 +14,10 @@
 <div>Room: <span id="room">connecting...</span></div>
 <video id="me" autoplay="autoplay"></video>
 
-<script src="dist/tiny-webrtc.min.js"></script>
+<script src="lib/tiny-webrtc.js"></script>
 <script>
     var webRTC = new WebRTC({
-        wsServer: "http://tinywebrtc.nodejitsu.com/"
+        wsServer: "ws://localhost:8080"
     });
 
     webRTC.onCameraAccess(function (stream) {

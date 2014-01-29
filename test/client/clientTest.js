@@ -78,7 +78,7 @@ describe("Client", function () {
         it('should access (mocked) camera', function () {
             waitsFor(function () {
                 return cameraAccess;
-            }, "it should call camera", 10000);
+            }, "it should call camera", 5000);
 
             runs(function () {
                 expect(access).toBeTruthy();
@@ -88,7 +88,7 @@ describe("Client", function () {
         it('should join room and return value', function () {
             waitsFor(function () {
                 return roomJoin;
-            }, "it should join room", 10000);
+            }, "it should join room", 5000);
 
             runs(function () {
                 expect(webRTC.getRoom()).toBeDefined();
