@@ -18,7 +18,6 @@
   "license": "MIT",
   "ignore": [
     "**/.*",
-    "/lib",
     "/test",
     "/node_modules"
   ]
