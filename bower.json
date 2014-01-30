@@ -7,8 +7,7 @@
   ],
   "description": "tiny webrtc layer for client and server",
   "main": [
-    "./dist/tiny-webrtc.js",
-    "./dist/tiny-webrtc.min.js"
+    "./lib/tiny-webrtc.js"
   ],
   "keywords": [
     "webrtc",
