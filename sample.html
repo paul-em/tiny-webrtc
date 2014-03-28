@@ -16,9 +16,7 @@
 
 <script src="lib/tiny-webrtc.js"></script>
 <script>
-    var webRTC = new WebRTC({
-        wsServer: "ws://tiny-webrtc-server2.nodejitsu.com/"
-    });
+    var webRTC = new WebRTC();
 
     webRTC.onCameraAccess(function (stream) {
         document.getElementById("me").src = stream;
