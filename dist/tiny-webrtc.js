@@ -8,6 +8,7 @@ var WebRTC = (function (opt) {
         socket,
         cameraAccess = false,
         joinRoomOnConnect = false,
+        channels = {video: true, audio: true},
         self = this,
         init = false;
 
@@ -115,8 +116,10 @@ var WebRTC = (function (opt) {
             peerConnections[data.userId].setRemoteDescription(new RTCSessionDescription(data.answer));
         },
         iceCandidate: function (data) {
-            peerConnections[data.userId].addIceCandidate(new RTCIceCandidate({sdpMLineIndex: data.iceCandidate.label,
-                candidate: data.iceCandidate.candidate}));
+            peerConnections[data.userId].addIceCandidate(new RTCIceCandidate({
+                sdpMLineIndex: data.iceCandidate.label,
+                candidate: data.iceCandidate.candidate
+            }));
         },
         userLeave: function (data) {
             remove(data.userId);
@@ -189,9 +192,13 @@ var WebRTC = (function (opt) {
 
     function getLocalStream(callback) {
         if (navigator.getUserMedia) {
-            var channels = {video: true, audio: true};
-            navigator.getUserMedia(channels, callback, function () {
-                dispatchEvent('error', "An Error occured while accessing your camera and microphone. Please reload this page");
+            navigator.getUserMedia(channels, callback, function (err) {
+                if (err.name === "DevicesNotFoundError" && channels.video) {
+                    channels.video = false;
+                    getLocalStream(callback);
+                } else {
+                    dispatchEvent('error', "An Error occured while accessing your camera and microphone. Please reload this page");
+                }
             });
         } else {
             dispatchEvent('error', "no getUserMedia support on your browser :(");
@@ -262,7 +269,6 @@ var WebRTC = (function (opt) {
         }
         return url;
     }
-
 
 
     self.init = function () {
@@ -360,7 +366,6 @@ var WebRTC = (function (opt) {
     self.getRoom = function () {
         return config.room;
     };
-
 
 
     self.sendData = function (userId, data) {
